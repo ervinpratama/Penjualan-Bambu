@@ -67,15 +67,37 @@
             </table>
             <div class="history-upload">
 
-                @if ($data->bukti_transfer == null)
+                @if (isset($data->reject->status) && $data->reject->status == "pending")
+                <p>Status Pembayaran : <span class="badge bg-danger">Rejected Pending</span></p>
+                @elseif (isset($data->reject->status) && $data->reject->status == "diterima")
+                <p>Status Pembayaran : <span class="badge bg-danger">Pembatalan Diterima</span></p>
+                @elseif (isset($data->reject->status) && $data->reject->status == "ditolak")
+                <p>Status Pembayaran : <span class="badge bg-danger">Pembatalan Ditolak</span></p>
+                @elseif ($data->bukti_transfer == null)
                 <p>Status Pembayaran : <span class="badge bg-danger">Belum Ada Bukti Pembayaran</span></p>
                 @elseif ($data->bukti_transfer->status == "acc")
-                <p>Status Pembayaran : <span class="badge bg-success">Accept</span></p>
+                <p>Status Pembayaran : <span class="badge bg-success">Diterima</span></p>
+                @elseif ($data->bukti_transfer->status == "dikirim")
+                <p>Status Pembayaran : <span class="badge bg-success">Dikirim</span></p>
+                @elseif ($data->bukti_transfer->status == "dibatalkan")
+                <p>Status Pembayaran : <span class="badge bg-danger">Dibatalkan</span></p>
+                @elseif ($data->bukti_transfer->status == "selesai")
+                <p>Status Pembayaran : <span class="badge bg-info">Selesai</span></p>
                 @else
                 <p>Status Pembayaran : <span class="badge bg-warning text-dark">Pending</span></p>
                 @endif
-                
-                <a href="/transaction/upload_bukti_transfer/{{ $data->id }}" class="btn btn-info">Upload Bukti Transfer</a>
+                <div class="">
+                    @if(!isset($data->bukti_transfer->status) || $data->bukti_transfer->status == 'pending')
+                    <a href="/transaction/upload_bukti_transfer/{{ $data->id }}" class="btn btn-info">Upload Bukti Transfer</a>
+                    <a onclick = "if (! confirm('Batalkan Pesanan?')) { return false; }" href="/transaction/batalkan_pesanan/{{ $data->id }}" class="btn btn-danger mt-2">Batalkan Pesanan</a>
+                    @elseif(isset($data->bukti_transfer->status) && $data->bukti_transfer->status == "dikirim")
+                    <a onclick = "if (! confirm('Terima Pesanan?')) { return false; }" href="/transaction/terima_pesanan/{{ $data->id }}" class="btn btn-warning mt-2">Terima Pesanan</a>
+                    @elseif(isset($data->bukti_transfer->status) && $data->bukti_transfer->status == "acc")
+                    <a href="/transaction/reject/{{ $data->id }}" class="btn btn-danger mt-2">Reject</a>
+                    @elseif(isset($data->bukti_transfer->status) && $data->bukti_transfer->status == "selesai")
+                    @else
+                    @endif
+                </div>
             </div>
         </div>
     </div>

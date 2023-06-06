@@ -36,6 +36,12 @@
         <i class="fas fa-fw fa-tachometer-alt"></i>
         <span>Transaksi</span></a>
     </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url('reject') }}">
+        <i class="fas fa-fw fa-tachometer-alt"></i>
+        <span>Pembatalan</span></a>
+    </li>
   @else
     <li class="nav-item">
       <a class="nav-link" href="{{ route('penjual') }}">

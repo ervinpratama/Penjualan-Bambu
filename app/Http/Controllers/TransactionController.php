@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\BuktiTransfer;
+use App\Models\Reject;
 use Illuminate\Support\Facades\Auth;
 use PDF;
 
@@ -22,7 +23,16 @@ class TransactionController extends Controller
         ->orderBy('transactions.id', 'DESC')
         ->get();
 
-        return view('transaction.index', ['transactions' => $transactions]);
+        $transaction_id = [];
+
+        foreach($transactions as $data){
+            array_push($transaction_id, $data->id);
+        }
+
+        $transaction_detail = TransactionDetail::join('barang', 'barang.id', '=', 'transaction_detail.barang_id')
+        ->whereIn('transaction_detail.transaction_id', $transaction_id)->get();
+
+        return view('transaction.index', ['transactions' => $transactions, 'details' => $transaction_detail]);
     }
 
     public function history()
@@ -33,6 +43,7 @@ class TransactionController extends Controller
                                     ->join('transaction_detail', 'transaction_detail.transaction_id', '=', 'transactions.id')
                                     ->join('barang', 'barang.id', '=', 'transaction_detail.barang_id')
                                     ->orderBy('transactions.id', 'DESC')
+                                    ->limit(1)
                                     ->get();
         
         $transaction_id = [];
@@ -98,12 +109,6 @@ class TransactionController extends Controller
         $detail = TransactionDetail::insert($transaction_detail);
 
         if($detail) {
-            // Mengurangi stok barang
-                foreach($carts as $item) {
-                    $barang = Barang::find($item->barang_id);
-                    $barang->jumlah -= $item->qty;
-                    $barang->save();
-            }
 
             // Menghapus cart setelah checkout
             Cart::where('user_id', Auth::user()->id)->delete();
@@ -138,12 +143,68 @@ class TransactionController extends Controller
         return redirect('/transaction/history');
     }
 
+    public function reject($id = null)
+    {
+        $transaction = Transaction::find($id);
+        return view('customer.reject', ['transaction' => $transaction]);
+    }
+
+    public function store_reject(Request $request)
+    {
+        $files = $request->file('images');
+        $filename = "";
+        foreach ($files as $file) {
+            $file->move('images/reject',$file->getClientOriginalName());
+            $filename .= "|".$file->getClientOriginalName();
+        }
+
+        Reject::create([
+            'transaction_id' => $request->id,
+            'images' => $filename,
+            'alasan' => $request->alasan,
+            'status' => 'pending',
+        ]);
+       
+        return redirect('/transaction/history');
+    }
+
     public function accept($id)
     {
         BuktiTransfer::where('transaction_id', $id)->update([
             'status' => 'acc'
         ]);
         return redirect('transaction');
+    }
+
+    public function kirim($id)
+    {
+        BuktiTransfer::where('transaction_id', $id)->update([
+            'status' => 'dikirim'
+        ]);
+        $dataCart = TransactionDetail::where('transaction_id',$id)->get();
+        // Mengurangi stok barang
+        foreach($dataCart as $item) {
+            $barang = Barang::find($item->barang_id);
+            $barang->jumlah -= $item->qty;
+            $barang->save();
+        }
+        return redirect('transaction');
+    }
+
+    public function terima_pesanan($id)
+    {
+        BuktiTransfer::where('transaction_id', $id)->update([
+            'status' => 'selesai'
+        ]);
+        return redirect('transaction/history');
+    }
+
+    public function batalkan_pesanan($id)
+    {
+        BuktiTransfer::where('transaction_id', $id)->update([
+            'status' => 'dibatalkan'
+        ]);
+        return redirect('transaction/history');
     }
 
     public function export_pdf(Request $request)

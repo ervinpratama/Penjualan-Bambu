@@ -16,6 +16,10 @@ class Transaction extends Model
     {
         return $this->hasOne(BuktiTransfer::class, 'transaction_id');
     }
+    public function reject()
+    {
+        return $this->hasOne(Reject::class, 'transaction_id');
+    }
 
     public function barang()
     {

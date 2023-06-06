@@ -9,6 +9,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PenjualController;
 use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\RejectController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -51,10 +52,25 @@ Route::middleware('auth')->group(function () {
 		Route::get('/checkout', 'checkout');
 		Route::post('/proses', 'proses');
 		Route::get('/history', 'history')->name('history');
+
+		Route::get('/terima_pesanan/{id}', 'terima_pesanan');
+		Route::get('/batalkan_pesanan/{id}', 'batalkan_pesanan');
+
 		Route::get('/upload_bukti_transfer/{id}', 'upload_bukti_transfer');
 		Route::post('/proses_upload', 'proses_upload')->name('upload.bukti');
+
+		Route::get('/reject/{id}', 'reject');
+		Route::post('/store_reject', 'store_reject');
+
 		Route::get('/accept/{id}', 'accept');
+		Route::get('/kirim/{id}', 'kirim');
 		Route::post('/export', 'export_pdf')->name('exportPDF');
+	});
+
+	//Transaction
+	Route::controller(RejectController::class)->prefix('reject')->group(function () {
+		Route::get('/', 'index');
+		Route::get('/change_status/{id}/{status}', 'change_status');
 	});
 
 	//Customer

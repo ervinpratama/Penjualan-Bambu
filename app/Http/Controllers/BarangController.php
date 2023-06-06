@@ -71,14 +71,13 @@ class BarangController extends Controller
 	public function update($id, Request $request)
 	{
         $this->validate($request, [
-            'kode_barang' => 'required',
             'nama_barang' => 'required',
             'id_kategori' => 'required',
             'harga' => 'required',
             'jumlah' => 'required',
             'ukuran' => 'required',
         ]);
-
+        
 		if($request->foto != null) {
 
 			$foto = time().'.'.$request->foto->extension();
