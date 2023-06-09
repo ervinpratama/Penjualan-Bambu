@@ -93,8 +93,9 @@
                     @elseif(isset($data->bukti_transfer->status) && $data->bukti_transfer->status == "dikirim")
                     <a onclick = "if (! confirm('Terima Pesanan?')) { return false; }" href="/transaction/terima_pesanan/{{ $data->id }}" class="btn btn-warning mt-2">Terima Pesanan</a>
                     @elseif(isset($data->bukti_transfer->status) && $data->bukti_transfer->status == "acc")
-                    <a href="/transaction/reject/{{ $data->id }}" class="btn btn-danger mt-2">Reject</a>
+                    <a onclick = "if (! confirm('Batalkan Pesanan?')) { return false; }" href="/transaction/batalkan_pesanan/{{ $data->id }}" class="btn btn-danger mt-2">Batalkan Pesanan</a>
                     @elseif(isset($data->bukti_transfer->status) && $data->bukti_transfer->status == "selesai")
+                    <a href="/transaction/reject/{{ $data->id }}" class="btn btn-danger mt-2">Reject</a>
                     @else
                     @endif
                 </div>
